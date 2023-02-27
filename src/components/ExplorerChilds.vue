@@ -1,5 +1,6 @@
 <template>
-    <div class="container mx-auto grid grid-cols-8 gap-4">
+    <div class="grid 
+    grid-cols-3 gap-x-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 zxl-grid-cols-12">
         <div v-for="(data, index) in metadata" :key="index"
         class="card bg-cyan-400 hover:bg-cyan-500 text-primary-content"
         style="cursor: pointer;">

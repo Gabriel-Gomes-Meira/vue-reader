@@ -2,9 +2,9 @@
     <div class="drawer drawer-end" style="height: 92.7vh;">
         <input id="bookmark-drawer" type="checkbox" class="drawer-toggle" />
 
-        <div class="drawer-content">
-            <div class="container mx-auto ">
-                <div id="area" @click="rendition.next()">
+        <div class="drawer-content" @click="rendition.next()">
+            <div class="container mx-auto " >
+                <div id="area" >
                 </div>
             </div>
         </div>
@@ -47,6 +47,7 @@
 
 <script>
 import Epub from "epubjs"
+
 import { mapGetters } from 'vuex'
 
 export default {
@@ -118,11 +119,30 @@ export default {
         this.rendition.book = Epub(this.$route.query.url)
 
 
-        this.rendition = this.rendition.book.renderTo("area", { flow: "paginated", method: "continuous", width: 800, height: 600 });
+        
+        this.rendition = this.rendition.book.renderTo("area", { 
+            flow: "paginated", 
+            method: "continuous", 
+            width: "inherit", height: "90vh",
+            stylesheet: "/output.css",
+            // script: "/dynamic_theme.js",            
+        });        
         this.rendition.display();
 
         this.rendition.on("displayed", () => {
             this.displaying = true;
+            // let frames = document.getElementsByTagName("iframe");
+            // frames.item(0).setAttribute("sandbox", "allow-same-origin allow-scripts allow-popups allow-forms");
+        })
+
+        this.rendition.on("locationChanged", () => {
+            const iframes = Array.from(document.querySelectorAll("iframe"));
+            const epubIframe = iframes?.find((item) => item.id.includes("epubjs-view"));
+            if (epubIframe) {
+                const iframedocument = epubIframe.contentWindow.document;
+                const htmls = iframedocument.getElementsByTagName("html");
+                htmls.item(0).setAttribute("data-theme", "night");
+            }
         })
 
     }

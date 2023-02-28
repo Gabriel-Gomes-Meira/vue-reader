@@ -38,7 +38,7 @@ const BOOKMARKS = {
     },
     
     clearBookMarks({ commit }){
-      commit.commit('clearBookMarks')
+      commit('clearBookMarks')
       localStorage.removeItem('bookMarks')
     }
   }

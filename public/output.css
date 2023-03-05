@@ -1709,9 +1709,15 @@ html {
   width: 100%;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 500px) {
   .container {
-    max-width: 640px;
+    max-width: 500px;
+  }
+}
+
+@media (min-width: 711px) {
+  .container {
+    max-width: 711px;
   }
 }
 
@@ -1786,6 +1792,13 @@ html {
 .btn-square {
   height: 3rem;
   width: 3rem;
+  padding: 0px;
+}
+
+.btn-circle {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 9999px;
   padding: 0px;
 }
 
@@ -3124,6 +3137,34 @@ html {
   padding: 0px;
 }
 
+.btn-circle:where(.btn-xs) {
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 9999px;
+  padding: 0px;
+}
+
+.btn-circle:where(.btn-sm) {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 9999px;
+  padding: 0px;
+}
+
+.btn-circle:where(.btn-md) {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 9999px;
+  padding: 0px;
+}
+
+.btn-circle:where(.btn-lg) {
+  height: 4rem;
+  width: 4rem;
+  border-radius: 9999px;
+  padding: 0px;
+}
+
 .btn-group .btn:not(:first-child):not(:last-child), .btn-group.btn-group-horizontal .btn:not(:first-child):not(:last-child) {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
@@ -3181,6 +3222,14 @@ html {
 
 .card-normal .card-title {
   margin-bottom: 0.75rem;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.z-50 {
+  z-index: 50;
 }
 
 .mx-auto {
@@ -3333,6 +3382,59 @@ html {
   background-color: rgb(6 182 212 / var(--tw-bg-opacity));
 }
 
+@media (min-width: 500px) {
+  .xs\:top-0 {
+    top: 0px;
+  }
+
+  .xs\:left-5 {
+    left: 1.25rem;
+  }
+
+  .xs\:right-5 {
+    right: 1.25rem;
+  }
+
+  .xs\:top-10 {
+    top: 2.5rem;
+  }
+
+  .xs\:top-20 {
+    top: 5rem;
+  }
+
+  .xs\:bottom-20 {
+    bottom: 5rem;
+  }
+
+  .xs\:bottom-14 {
+    bottom: 3.5rem;
+  }
+
+  .xs\:bottom-5 {
+    bottom: 1.25rem;
+  }
+
+  .xs\:bottom-3 {
+    bottom: 0.75rem;
+  }
+}
+
+@media (min-width: 711px) {
+  .sm\:inset-y-1\/2 {
+    top: 50%;
+    bottom: 50%;
+  }
+
+  .sm\:left-5 {
+    left: 1.25rem;
+  }
+
+  .sm\:right-5 {
+    right: 1.25rem;
+  }
+}
+
 @media (min-width: 768px) {
   .md\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3340,6 +3442,14 @@ html {
 }
 
 @media (min-width: 1024px) {
+  .lg\:left-20 {
+    left: 5rem;
+  }
+
+  .lg\:right-20 {
+    right: 5rem;
+  }
+
   .lg\:grid-cols-6 {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }

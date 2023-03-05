@@ -2,7 +2,18 @@
     <div class="drawer drawer-end" style="height: 92.7vh;">
         <input id="bookmark-drawer" type="checkbox" class="drawer-toggle" />
 
-        <div class="drawer-content" @click="rendition.next()">
+        <div class="drawer-content" >
+            <button class="btn btn-circle btn-outline absolute xs:bottom-3 sm:inset-y-1/2 lg:left-20 xs:left-5 z-50" @click="rendition.prev()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </button>
+            <button class="btn btn-circle btn-outline absolute xs:bottom-3 sm:inset-y-1/2 lg:right-20 xs:right-5 z-50" @click="rendition.next()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+            </button>
+            
             <div class="container mx-auto " >
                 <div id="area" >
                 </div>
@@ -59,7 +70,9 @@ export default {
     data: () => {
         return {
             rendition: {},
-            displaying: false
+            displaying: false,
+            comands: {},
+            eventFunction: null,            
         }
     },
 
@@ -124,28 +137,65 @@ export default {
             flow: "paginated", 
             method: "continuous", 
             width: "inherit", height: "90vh",
-            stylesheet: "/output.css",
+            // stylesheet: "/output.css",
             // script: "/dynamic_theme.js",            
         });        
         this.rendition.display();
 
-        this.rendition.on("displayed", () => {
-            this.displaying = true;
-            // let frames = document.getElementsByTagName("iframe");
-            // frames.item(0).setAttribute("sandbox", "allow-same-origin allow-scripts allow-popups allow-forms");
+        this.rendition.on("displayed", () => {            
+            this.displaying = true;            
+            this.comands = {
+                "ArrowRight": () => {                    
+                    this.rendition.next()                    
+                },                                    
+                "ArrowLeft": () => {
+                    this.rendition.prev()
+                }
+            }                
+            
         })
-
-        this.rendition.on("locationChanged", () => {
-            const iframes = Array.from(document.querySelectorAll("iframe"));
-            const epubIframe = iframes?.find((item) => item.id.includes("epubjs-view"));
-            if (epubIframe) {
-                const iframedocument = epubIframe.contentWindow.document;
-                const htmls = iframedocument.getElementsByTagName("html");
-                htmls.item(0).setAttribute("data-theme", "night");
+        this.rendition.themes.default({
+            html: {
+                'background-color': 'rgb(15, 23, 42)',
+                color:"#b4c6ef",
+                'line-height': 1.5,
+                /* 1 */
+                '-webkit-text-size-adjust': '100%',
+                /* 2 */
+                '-moz-tab-size': '4',
+                /* 3 */
+                '-o-tab-size': '4',
+                'tab-size': '4',
+                /* 3 */
+                'font-family': 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+                /* 4 */
+                'font-feature-settings': 'normal',
+            },
+            a: {
+                color: "#b4c6ef"
             }
-        })
+        }, "/output.css");
+        
 
-    }
+        // this.rendition.on("locationChanged", () => {
+            // const content = this.rendition.getContents()[0]            
+            // content.documentElement.setAttribute("data-theme", "night");            
+            // console.log("deveria ter mudado a cor")
+            
+        // })       
+        
+        this.eventFunction = (e) => {                                        
+            if (this.comands[e.key]) {
+                this.comands[e.key]()
+            }
+        }
+
+        window.document.addEventListener("keydown", this.eventFunction)
+    },
+
+    beforeDestroy() {
+        window.document.removeEventListener("keydown", this.eventFunction)
+    },
 }
 </script>
 

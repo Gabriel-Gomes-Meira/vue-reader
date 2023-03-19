@@ -44,58 +44,8 @@ const BOOKMARKS = {
   }
 }
 
-const WORDS = {
-  state: {
-    voculary: {}    /// estado do vocabulario local
-  }, 
-  
-  getters : {
-    getLocalVocabulary(state) {
-      return state.vocabulary;
-    }
-  },
-
-  mutations: {
-    /// adicionar no local    
-    addToLocalVocabulary(state, data) {
-      if (!state.vocabulary[data.srctgt]) {
-        state.vocabulary[data.srctgt] = {}
-      }
-
-      state.vocabulary[data.srctgt][data.word] = data.translation
-    }
-  },
-
-  actions: {                
-    /// traduzir
-    setTranslation({ commit }, data) {
-      // fetch("http://localhost:8080/SharedState/vocabulary.json").then(response => {
-      //   response.json().then (json => {
-      //     if (json[data.srctgt]) {            
-            
-      //       if (json[data.srctgt][data.word]) {
-      //         commit('addToLocalVocabulary', {
-      //           srctgt: data.srctgt, 
-      //           word: data.word, 
-      //           translation: json[data.srctgt][data.word]
-      //         })
-      //       } else {
-
-      //       }
-
-      //     } else {
-            
-      //     }
-      //   })
-      // })            
-    }
-  }
-}
-
-
 export default createStore({  
   modules: {
-    bookmark: BOOKMARKS,
-    words: WORDS
+    bookmark: BOOKMARKS,    
   }
 })

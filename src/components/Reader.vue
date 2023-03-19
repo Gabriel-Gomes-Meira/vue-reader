@@ -58,7 +58,7 @@
 
 <script>
 import Epub from "epubjs"
-
+import axios from "axios";
 import { mapGetters } from 'vuex'
 
 export default {
@@ -78,22 +78,21 @@ export default {
 
     computed: {
         ...mapGetters([
-            'getBookMarks'
+            'getBookMarks',
+            'getLocalVocabulary'
         ]),
 
         labelTocByLocations() {
             if (this.displaying) {
                 var labelTocByLocations = {}
-                let toc_index = -1
-                // while(index < this.rendition.book.navigation.toc.length)
+                let toc_index = -1                
                 for (let location_index = 0; location_index < this.rendition.book.spine.items.length; location_index++) {
                     let key = this.rendition.book.spine.items[location_index].href;
                     if (this.rendition.book.spine.items[location_index].href == this.rendition.book.navigation.toc[toc_index + 1].href) {
                         toc_index++;
                     }
                     labelTocByLocations[key] = this.rendition.book.navigation.toc[toc_index].label;
-                }
-                // }
+                }                
                 return labelTocByLocations;
             }
 
@@ -127,6 +126,7 @@ export default {
     },
 
     created() {
+        this.$store.dispatch('setTranslation', {srctgt: "en-US|pt-BR", word: "Apple"});
 
         this.$store.dispatch('initBookMarks')
         this.rendition.book = Epub(this.$route.query.url)
@@ -191,6 +191,23 @@ export default {
         }
 
         window.document.addEventListener("keydown", this.eventFunction)
+        
+
+        axios.get('ajax.php')
+          .then(function (response) {
+            // adicionar os nomes dos clientes à lista
+            // response.data.forEach(function (cliente) {
+            //   var li = document.createElement('li');
+            //   li.textContent = cliente;
+            //   document.getElementById('clientes').appendChild(li);
+            // });
+            console.log(response.data)
+          })
+          .catch(function (error) {
+            // exibir uma mensagem de erro caso ocorra algum problema na solicitação
+            console.error(error);
+            alert('Erro ao obter a lista de clientes');
+          });
     },
 
     beforeDestroy() {

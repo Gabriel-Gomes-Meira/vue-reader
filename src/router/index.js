@@ -1,6 +1,6 @@
-import Explorer from '../components/Explorer.vue'
-import ExplorerChilds  from '../components/ExplorerChilds.vue'
-import Reader from '../components/Reader.vue'
+import Explorer from '../views/Explorer.vue'
+import ExplorerChilds  from '../views/ExplorerChilds.vue'
+import Reader from '../views/Reader.vue'
 import {createRouter, createWebHashHistory} from 'vue-router'
 // 2. Define some routes
 // Each route should map to a component.

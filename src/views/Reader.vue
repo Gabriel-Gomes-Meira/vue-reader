@@ -26,10 +26,25 @@
 
             <div class="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg"            
                 v-show="menu.isExpanded" :style="{ top: menu.top + 'px', left: menu.left + 'px' }">
-                <ul class="menu bg-base-100 w-56 p-2 rounded-box" >
-                    <li class="bg-base-100"><a>Item 1</a></li>
-                    <li class="bg-base-100"><a class="bg-base-100">Item 2</a></li>
-                    <li class="bg-base-100"><a>Item 3</a></li>
+                <ul class="menu bg-transparent w-56 p-2" >
+                    <div class="collapse bg-base-100 pa-0">
+                        <input type="checkbox" class="peer"
+                        :disabled="selectedText?false:true"                        
+                        id="checkbox_translate_option"                        
+                        /> 
+                        <li class="collapse-title bg-base-100 rounded-xl
+                        peer-checked:bg-primary peer-checked:text-primary-content
+                        peer-checked:w-96" 
+                        style="padding: 0;"
+                        :class="!selectedText?'disabled':''">                        
+                            <a >Traduzir</a>
+                        </li>                                                                 
+                        <div class="collapse-content"> 
+                            <translate-card-vue                            
+                            v-model="selectedText"                             
+                            />
+                        </div>
+                    </div>                       
                 </ul>
             </div>
         </div>
@@ -68,7 +83,10 @@
 
 <script>
 import Epub from "epubjs"
+
 import axios from "axios";
+import TranslateCardVue from '../components/TranslateCard.vue';
+
 import { mapGetters } from 'vuex'
 
 export default {
@@ -88,7 +106,9 @@ export default {
                 isExpanded: false,
                 top: 0,
                 left: 0,
-            }
+            },
+            selectedText: '',
+            checked: false
         }
     },
 
@@ -141,13 +161,28 @@ export default {
         },
 
         showMenu(event) {
+            // console.log(event)
+            // console.log(event.view.getSelection())
+
             event.preventDefault();
-            this.menu.isExpanded = true;
-            // this.menu.top = event.pageY + 5;
-            // this.menu.left = event.pageX - 80;
+            this.menu.isExpanded = true;            
             this.menu.top = event.pageY + 70;
             this.menu.left = event.pageX + 190;
+            // console.log(this.rendition.book)
+            
+            // pegar palavara selecionada
+            this.selectedText = this.rendition.getContents()[0].window.getSelection().toString()       
+            // this.checked = false     
+            document.querySelector("#checkbox_translate_option").checked = false
         },
+
+        // checkTranlateBox(e) {
+        //     console.log(e)
+        // }
+    },
+
+    components: {
+        TranslateCardVue
     },
 
     created() {
@@ -222,6 +257,7 @@ export default {
             //     console.log('hey');
             // })
             i.document.documentElement.addEventListener('contextmenu', this.showMenu)
+            i.document.documentElement.addEventListener('click', () => this.menu.isExpanded = false)
         });
         // axios.get('')
         // .then(function (response) {

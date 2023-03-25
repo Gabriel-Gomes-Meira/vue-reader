@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            <div class="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg"            
+            <div class="origin-top-right absolute right-0 mt-2 w-56 rounded-lg"            
                 v-show="menu.isExpanded" :style="{ top: menu.top + 'px', left: menu.left + 'px' }">
                 <ul class="menu bg-transparent w-56 p-2" >
                     <div class="collapse bg-base-100 pa-0">
@@ -32,14 +32,23 @@
                         :disabled="selectedText?false:true"                        
                         id="checkbox_translate_option"                        
                         /> 
-                        <li class="collapse-title bg-base-100 rounded-xl
+                        <li class="collapse-title bg-base-100 
+                        rounded-t-xl
                         peer-checked:bg-primary peer-checked:text-primary-content
-                        peer-checked:w-96" 
-                        style="padding: 0;"
+                        peer-checked:w-96
+                        font-medium                    
+                        " 
+                        style="
+                            padding-top:8px;                         
+                            padding-bottom:0;   
+                        "
                         :class="!selectedText?'disabled':''">                        
                             <a >Traduzir</a>
                         </li>                                                                 
-                        <div class="collapse-content"> 
+                        <div class="collapse-content
+                        rounded-b-2xl                         
+                        "                        
+                        style="padding: 0"> 
                             <translate-card-vue                            
                             v-model="selectedText"                             
                             />
@@ -84,7 +93,7 @@
 <script>
 import Epub from "epubjs"
 
-import axios from "axios";
+
 import TranslateCardVue from '../components/TranslateCard.vue';
 
 import { mapGetters } from 'vuex'
@@ -164,10 +173,11 @@ export default {
             // console.log(event)
             // console.log(event.view.getSelection())
 
+            console.log(event)
             event.preventDefault();
             this.menu.isExpanded = true;            
-            this.menu.top = event.pageY + 70;
-            this.menu.left = event.pageX + 190;
+            this.menu.top = event.screenY -90;
+            this.menu.left = event.screenX - 10;
             // console.log(this.rendition.book)
             
             // pegar palavara selecionada
@@ -259,14 +269,6 @@ export default {
             i.document.documentElement.addEventListener('contextmenu', this.showMenu)
             i.document.documentElement.addEventListener('click', () => this.menu.isExpanded = false)
         });
-        // axios.get('')
-        // .then(function (response) {
-            
-            // })
-        // .catch(function (error) {
-        //     // exibir uma mensagem de erro caso ocorra algum problema na solicitação
-        //     console.error(error);            
-        // });
 
     },
 

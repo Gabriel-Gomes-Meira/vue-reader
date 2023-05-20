@@ -23,39 +23,7 @@
                 <div id="area">
                 </div>
             </div>
-
-            <div class="origin-top-right absolute right-0 mt-2 w-56 rounded-lg"            
-                v-show="menu.isExpanded" :style="{ top: menu.top + 'px', left: menu.left + 'px' }">
-                <ul class="menu bg-transparent w-56 p-2" >
-                    <div class="collapse bg-base-100 pa-0">
-                        <input type="checkbox" class="peer"
-                        :disabled="selectedText?false:true"                        
-                        id="checkbox_translate_option"                        
-                        /> 
-                        <li class="collapse-title bg-base-100 
-                        rounded-t-xl
-                        peer-checked:bg-primary peer-checked:text-primary-content
-                        peer-checked:w-96
-                        font-medium                    
-                        " 
-                        style="
-                            padding-top:8px;                         
-                            padding-bottom:0;   
-                        "
-                        :class="!selectedText?'disabled':''">                        
-                            <a >Traduzir</a>
-                        </li>                                                                 
-                        <div class="collapse-content
-                        rounded-b-2xl                         
-                        "                        
-                        style="padding: 0"> 
-                            <translate-card-vue                            
-                            v-model="selectedText"                             
-                            />
-                        </div>
-                    </div>                       
-                </ul>
-            </div>
+            
         </div>
 
         <div class="drawer-side">
@@ -93,9 +61,6 @@
 <script>
 import Epub from "epubjs"
 
-
-import TranslateCardVue from '../components/TranslateCard.vue';
-
 import { mapGetters } from 'vuex'
 
 export default {
@@ -110,12 +75,6 @@ export default {
             displaying: false,
             comands: {},
             keyboardFunctions: null,
-            contextCaller: null,
-            menu: {
-                isExpanded: false,
-                top: 0,
-                left: 0,
-            },
             selectedText: '',
             checked: false
         }
@@ -123,8 +82,7 @@ export default {
 
     computed: {
         ...mapGetters([
-            'getBookMarks',
-            'getLocalVocabulary'
+            'getBookMarks'
         ]),
 
         labelTocByLocations() {
@@ -169,30 +127,6 @@ export default {
             this.$store.dispatch('storeBookMark');
         },
 
-        showMenu(event) {
-            // console.log(event)
-            // console.log(event.view.getSelection())
-
-            console.log(event)
-            event.preventDefault();
-            this.menu.isExpanded = true;            
-            this.menu.top = event.screenY -90;
-            this.menu.left = event.screenX - 10;
-            // console.log(this.rendition.book)
-            
-            // pegar palavara selecionada
-            this.selectedText = this.rendition.getContents()[0].window.getSelection().toString()       
-            // this.checked = false     
-            document.querySelector("#checkbox_translate_option").checked = false
-        },
-
-        // checkTranlateBox(e) {
-        //     console.log(e)
-        // }
-    },
-
-    components: {
-        TranslateCardVue
     },
 
     created() {
@@ -261,14 +195,7 @@ export default {
         }
                                         
         window.document.addEventListener("keydown", this.keyboardFunctions)
-                                            
-        this.rendition.on("rendered", (e,i) => {;
-            // i.document.documentElement.addEventListener('contextmenu', (cfiRange, contents) => {
-            //     console.log('hey');
-            // })
-            i.document.documentElement.addEventListener('contextmenu', this.showMenu)
-            i.document.documentElement.addEventListener('click', () => this.menu.isExpanded = false)
-        });
+                                        
 
     },
 

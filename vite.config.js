@@ -7,7 +7,7 @@ const path = require("path");
 export default defineConfig({
   plugins: [vue()],
   resolve: {
-    extensions: [".js", ".vue", ".json"],
+    extensions: [".js", ".vue", ".json", ".css"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },

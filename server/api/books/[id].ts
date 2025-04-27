@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
 
             return {status: 'success'}
         } catch (error) {
+            console.error(error)
             throw createError({
                 statusCode: 500,
                 statusMessage: 'Erro ao deletar book'

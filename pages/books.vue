@@ -31,15 +31,32 @@
         </select>
       </div>
 
+      <!-- Input para múltiplos arquivos Markdown -->
       <div class="form-control">
         <label class="label w-full">
-          <span class="label-text">Arquivo EPUB</span>
+          <span class="label-text">Arquivos Markdown</span>
         </label>
         <input
             type="file"
-            @change="handleFileUpload"
-            accept=".epub"
+            @change="handleMarkdownFilesUpload"
+            accept=".md"
             class="file-input file-input-bordered w-full max-w-md"
+            multiple
+            required
+        />
+      </div>
+
+      <!-- Input para múltiplos arquivos de imagem -->
+      <div class="form-control">
+        <label class="label w-full">
+          <span class="label-text">Imagens</span>
+        </label>
+        <input
+            type="file"
+            @change="handleImageFilesUpload"
+            accept="image/*"
+            class="file-input file-input-bordered w-full max-w-md"
+            multiple
             required
         />
       </div>
@@ -79,10 +96,16 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+const markdownFiles = ref<File[]>([])
+const imageFiles = ref<File[]>([])
+
 const book = ref({
   name: '',
   serieId: '',
-  content: null as File | null
+  markdownFile: null as File | null,
+  images: [] as File[]
 })
 
 const books = ref([])
@@ -98,33 +121,60 @@ const carregarSeries = async () => {
   }
 }
 
-// Carregar books
+// Carregar livros
 const carregarLivros = async () => {
   try {
     const response = await fetch('/api/books')
     books.value = await response.json()
   } catch (error) {
-    console.error('Erro ao carregar books:', error)
+    console.error('Erro ao carregar livros:', error)
   }
 }
 
-// Manipular upload de arquivo
-const handleFileUpload = (event: Event) => {
+// Manipular upload de arquivos Markdown
+const handleMarkdownFilesUpload = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files) {
-    book.value.content = target.files[0]
+    markdownFiles.value = Array.from(target.files)
   }
 }
 
-// Cadastrar book
+// Manipular upload do arquivo Markdown
+const handleMarkdownUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files) {
+    book.value.markdownFile = target.files[0]
+  }
+}
+
+// Manipular upload de arquivos de imagem
+const handleImageFilesUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files) {
+    imageFiles.value = Array.from(target.files)
+  }
+}
+
+// Manipular upload das imagens
+const handleImageUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files) {
+    book.value.images = Array.from(target.files)
+  }
+}
+
+// Cadastrar livro
 const cadastrarLivro = async () => {
   try {
     const formData = new FormData()
     formData.append('name', book.value.name)
     formData.append('serieId', book.value.serieId.toString())
-    if (book.value.content) {
-      formData.append('epub', book.value.content)
-    }
+
+    // Adicionando os arquivos markdown
+    markdownFiles.value.forEach(file => formData.append('markdownFiles', file))
+
+    // Adicionando as imagens
+    imageFiles.value.forEach(file => formData.append('imageFiles', file))
 
     const response = await fetch('/api/books', {
       method: 'POST',
@@ -136,11 +186,11 @@ const cadastrarLivro = async () => {
       await carregarLivros()
     }
   } catch (error) {
-    console.error('Erro ao cadastrar book:', error)
+    console.error('Erro ao cadastrar livro:', error)
   }
 }
 
-// Deletar book
+// Deletar livro
 const deletarLivro = async (id: number) => {
   try {
     const response = await fetch(`/api/books/${id}`, {
@@ -151,7 +201,7 @@ const deletarLivro = async (id: number) => {
       await carregarLivros()
     }
   } catch (error) {
-    console.error('Erro ao deletar book:', error)
+    console.error('Erro ao deletar livro:', error)
   }
 }
 

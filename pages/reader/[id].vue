@@ -1,9 +1,12 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
+import {useStore} from 'vuex'
+import {useRoute} from 'vue-router'
 import Epub from 'epubjs'
+
 const { $hammer } = useNuxtApp()
+const { protocol, host } = useRequestURL()
+
 
 const store = useStore()
 const route = useRoute()
@@ -36,6 +39,14 @@ const labelTocByLocations = computed(() => {
   }
   return labels
 })
+
+const selectedWord = ref('')
+const tooltipPosition = ref({ top: 0, left: 0 })
+const showingTooltip = ref(false)
+const tooltip = ref(null)
+const translation = ref('') // Tradução a ser inserida
+const words = ref([])
+
 
 const addBookMark = () => {
   store.commit('ADD_BOOKMARK', {bookId: route.params.id, location: rendition.value.currentLocation()})
@@ -173,12 +184,129 @@ const cleanupTouchEvents = () => {
   }
 }
 
+const showTooltip = (selectedText, rect) => {
+  selectedWord.value = selectedText
+  tooltipPosition.value = {
+    top: rect.top + window.scrollY,
+    left: rect.left + window.scrollX
+  }
+  showingTooltip.value = true
+}
+
+const saveTranslation = async () => {
+  try {
+    // Salvar a word
+    const wordResponse = await fetch('/api/words', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ term: selectedWord.value, translate: translation.value }),
+    });
+
+    const wordData = await wordResponse.json();
+
+    if (!wordResponse.ok) {
+      console.error('Erro ao salvar word:', wordData);
+    }
+  } catch (error) {
+    console.error('Erro ao salvar tradução:', error);
+  } finally {
+    // Fechar o tooltip e limpar o campo de tradução
+    showingTooltip.value = false;
+    translation.value = '';
+    await getSavedWordWithTranslation()
+  }
+};
+
+const getSavedWordWithTranslation = async () => {
+  const response = await fetch(`/api/words`)
+  words.value = await response.json()
+
+  if (rendition.value && rendition.value.getContents) {
+    const contents = rendition.value.getContents();
+    contents.forEach((content) => {
+      highlightWords(content.document, words.value);
+    });
+  }
+}
+
+const closeTooltip = () => {
+  showingTooltip.value = false
+}
+
+const handleClickOutside = (event) => {
+  if (tooltip.value && !tooltip.value.contains(event.target)) {
+    closeTooltip()
+  }
+}
+
+function highlightWords(contentDocument, wordsSalvas) {
+  /**
+  const link = contentDocument.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `${protocol}//${host}/highlight.css`; // Usando a URL dinâmica
+  contentDocument.head.appendChild(link);
+
+  const script = contentDocument.createElement("script");
+  script.src = `${protocol}//${host}/iframe.js`;
+  contentDocument.head.appendChild(script);*/
+
+  wordsSalvas.forEach((word) => {
+    const translatesText = word.translates.map((translate) => translate.translate).join('</br>');
+
+    let replaced = false;
+
+    // Buscar todos os elementos de texto (como parágrafos, divs, etc.)
+    const elements = contentDocument.body.querySelectorAll('p, span, h1, h2, h3, h4, h5'); // Adicione mais tipos de elementos, se necessário
+
+    elements.forEach((element) => {
+      const regex = new RegExp(`\\b${word.term}\\b`, "i");
+
+      if (regex.test(element.textContent)) {
+        // Substitui apenas a primeira ocorrência dentro do conteúdo do elemento
+        const newContent = element.innerHTML.replace(regex, (matched) => {
+          if (!replaced) {
+            replaced = true;
+            // Usa o matched (o texto encontrado) no lugar de word.term
+            const tooltipTemplate = `
+              <div class="highlight tooltip " >
+                  <div class="tooltip-content no-text-indent">
+                    <div class="card p-0 card-xs">
+                      <div class="card-body">
+                          ${translatesText}
+                      </div>
+                    </div>
+                  </div>
+                  <span class="bg-base-content text-base-100">${matched}</span>
+              </div>
+            `;
+            return tooltipTemplate; // Aplica o tooltip no texto encontrado
+          }
+          return matched; // Não substitui as ocorrências subsequentes, mantendo o texto original
+        });
+
+        element.innerHTML = newContent; // Atualiza o conteúdo com o novo HTML
+      }
+    });
+  });
+}
+
 onMounted(async () => {
   store.dispatch('initBookMarks')
+  await getSavedWordWithTranslation()
 
-  // Inicializa Epub
+  // Adicionar o listener de clique fora quando o componente for montado
+  window.addEventListener('click', handleClickOutside)
+  // Adiciona um listener para a comunicação com o iframe
+  window.addEventListener('message', (event) => {
+    if (event.data === 'clickOutsideIframe') {
+      closeTooltip() // Fecha o tooltip quando a mensagem do iframe for recebida
+    }
+  })
+
   try {
-    const response = await fetch(`/api/livros/${route.params.id}/download`)
+    const response = await fetch(`/api/books/${route.params.id}/download`)
     const arrayBuffer = await response.arrayBuffer()
 
     rendition.value.book = new Epub(arrayBuffer, { encoding: "binary" })
@@ -188,19 +316,71 @@ onMounted(async () => {
       method: "continuous",
       width: "inherit",
       height: "90vh",
+      script: `${protocol}//${host}/iframe.js`,
+      style: `${protocol}//${host}/highlight.css`,
     })
 
     rendition.value.display()
 
-    // Tratamento pra mobile
+    // Detecção de seleção de texto
+    rendition.value.on('rendered', () => {
+      const contents = rendition.value.getContents();
+
+      const tailwindJsUrl = 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'
+      const daisyUiCssUrl = 'https://cdn.jsdelivr.net/npm/daisyui@5'
+      const daisyUiThemesUrl = 'https://cdn.jsdelivr.net/npm/daisyui@5/themes.css'
+
+      contents.forEach((content) => {
+
+        const linkDaisyUiCss = content.document.createElement('link')
+        linkDaisyUiCss.rel = 'stylesheet'
+        linkDaisyUiCss.href = daisyUiCssUrl
+        linkDaisyUiCss.type = 'text/css'
+        content.document.head.appendChild(linkDaisyUiCss)
+        const linkTailwindJs = content.document.createElement('script')
+        linkTailwindJs.src = tailwindJsUrl
+        linkTailwindJs.type = 'text/javascript'
+        content.document.head.appendChild(linkTailwindJs)
+        const linkDaisyUiThemes = content.document.createElement('link')
+        linkDaisyUiThemes.rel = 'stylesheet'
+        linkDaisyUiThemes.href = daisyUiThemesUrl
+        linkDaisyUiThemes.type = 'text/css'
+        content.document.head.appendChild(linkDaisyUiThemes)
+        content.document.querySelector('html').setAttribute('data-theme', 'night')
+
+
+        highlightWords(content.document, words.value);
+      });
+
+
+      const iframe = document.querySelector('#area iframe')
+      const iframeWindow = iframe.contentWindow
+      const iframeDocument = iframeWindow.document
+
+      iframeDocument.addEventListener("mouseup", function() {
+        const selection = iframeWindow.getSelection()
+        const selectedText = selection.toString().trim()
+
+        if (selectedText) {
+          // Exibe o tooltip com a word selecionada
+          showTooltip(selectedText, selection.getRangeAt(0).getBoundingClientRect())
+        }
+      })
+
+    })
+
+    rendition.value.on('selected', (cfiRange, contents) => {
+      console.log('selected', cfiRange, contents)
+    })
+
+    // Tratamento para dispositivos móveis
     checkTouchDevice()
     window.addEventListener('resize', checkTouchDevice)
 
-    // Adicionar eventos touch quando o livro for exibido
     rendition.value.on("displayed", () => {
       displaying.value = true
       setupKeyboardControls()
-      setupTheme()
+      //setupTheme()
 
       if (isTouchDevice.value) {
         retrySetupEvents()
@@ -216,7 +396,7 @@ onMounted(async () => {
 
     // Tratamento pra mobile
   } catch (error) {
-    console.error('Erro ao carregar o livro:', error)
+    console.error('Erro ao carregar o book:', error)
   }
   // Inicializa Epub
 
@@ -229,13 +409,13 @@ onMounted(async () => {
   }
 })
 
+
 // Adicionar watch para garantir que os eventos sejam reconfigurados se necessário
 watch(() => displaying.value, (newVal) => {
   if (newVal && isTouchDevice.value) {
     retrySetupEvents()
   }
 })
-
 
 onBeforeUnmount(() => {
   cleanupTouchEvents()
@@ -245,7 +425,8 @@ onBeforeUnmount(() => {
   }
 
   window.removeEventListener('resize', checkTouchDevice)
-
+  window.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('message', () => {}) // Remover o listener
 })
 </script>
 
@@ -281,7 +462,32 @@ onBeforeUnmount(() => {
         <div id="area" >
         </div>
       </div>
-    </div
+
+      <!-- Tooltip/Modal -->
+      <Transition >
+        <div
+            ref="tooltip"
+            v-if="showingTooltip"
+            :style="{ top: tooltipPosition.top + 'px', left: tooltipPosition.left + 'px' }"
+            class="absolute border p-4 rounded-md shadow-lg z-10 bg-base-100"
+        >
+          <div class="flex items-center">
+            <input
+                v-model="translation"
+                type="text"
+                class="input input-bordered w-48"
+                :placeholder="selectedWord"
+            />
+            <button @click.stop="saveTranslation" class="btn btn-primary btn-sm ml-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+
+            </button>
+          </div>
+        </div>
+      </Transition>
+    </div>
 
     <div class="drawer-side">
       <label for="bookmark-drawer" class="drawer-overlay"></label>
@@ -317,3 +523,20 @@ onBeforeUnmount(() => {
     </div>
   </div>
 </template>
+
+<style>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+iframe {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+</style>

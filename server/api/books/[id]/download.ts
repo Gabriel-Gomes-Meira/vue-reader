@@ -13,11 +13,11 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const livro = await prisma.livro.findUnique({
+        const book = await prisma.book.findUnique({
             where: { id }
         })
 
-        if (!livro) {
+        if (!book) {
             throw createError({
                 statusCode: 404,
                 statusMessage: 'Livro não encontrado'
@@ -26,11 +26,11 @@ export default defineEventHandler(async (event) => {
 
         setHeader(event, 'Content-Type', 'application/epub+zip')
 
-        return livro.conteudo
+        return book.content
     } catch (error) {
         throw createError({
             statusCode: 500,
-            statusMessage: 'Erro ao baixar livro'
+            statusMessage: 'Erro ao baixar book'
         })
     }
 })

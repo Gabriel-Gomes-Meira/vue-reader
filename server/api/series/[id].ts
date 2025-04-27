@@ -18,8 +18,8 @@ export default defineEventHandler(async (event) => {
             const serie = await prisma.serie.update({
                 where: {id: parseInt(id)},
                 data: {
-                    titulo: body.titulo,
-                    autor: body.autor
+                    title: body.title,
+                    author: body.author
                 }
             })
             return serie

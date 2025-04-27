@@ -9,7 +9,7 @@
         </label>
         <input
             type="text"
-            v-model="livro.nome"
+            v-model="book.name"
             class="input input-bordered w-full max-w-md"
             required
         />
@@ -20,13 +20,13 @@
           <span class="label-text">Série</span>
         </label>
         <select
-            v-model="livro.serieId"
+            v-model="book.serieId"
             class="select select-bordered w-full max-w-md"
             required
         >
           <option value="" disabled selected>Selecione uma série</option>
           <option v-for="serie in series" :key="serie.id" :value="serie.id">
-            {{ serie.titulo }}
+            {{ serie.title }}
           </option>
         </select>
       </div>
@@ -61,12 +61,12 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="livro in livros" :key="livro.id">
-            <td>{{ livro.id }}</td>
-            <td>{{ livro.nome }}</td>
-            <td>{{ livro.serie.titulo }}</td>
+          <tr v-for="book in books" :key="book.id">
+            <td>{{ book.id }}</td>
+            <td>{{ book.name }}</td>
+            <td>{{ book.serie.title }}</td>
             <td>
-              <button class="btn btn-error btn-sm" @click="deletarLivro(livro.id)">
+              <button class="btn btn-error btn-sm" @click="deletarLivro(book.id)">
                 Excluir
               </button>
             </td>
@@ -79,13 +79,13 @@
 </template>
 
 <script setup lang="ts">
-const livro = ref({
-  nome: '',
+const book = ref({
+  name: '',
   serieId: '',
-  conteudo: null as File | null
+  content: null as File | null
 })
 
-const livros = ref([])
+const books = ref([])
 const series = ref([])
 
 // Carregar séries
@@ -98,13 +98,13 @@ const carregarSeries = async () => {
   }
 }
 
-// Carregar livros
+// Carregar books
 const carregarLivros = async () => {
   try {
-    const response = await fetch('/api/livros')
-    livros.value = await response.json()
+    const response = await fetch('/api/books')
+    books.value = await response.json()
   } catch (error) {
-    console.error('Erro ao carregar livros:', error)
+    console.error('Erro ao carregar books:', error)
   }
 }
 
@@ -112,38 +112,38 @@ const carregarLivros = async () => {
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files) {
-    livro.value.conteudo = target.files[0]
+    book.value.content = target.files[0]
   }
 }
 
-// Cadastrar livro
+// Cadastrar book
 const cadastrarLivro = async () => {
   try {
     const formData = new FormData()
-    formData.append('nome', livro.value.nome)
-    formData.append('serieId', livro.value.serieId.toString())
-    if (livro.value.conteudo) {
-      formData.append('epub', livro.value.conteudo)
+    formData.append('name', book.value.name)
+    formData.append('serieId', book.value.serieId.toString())
+    if (book.value.content) {
+      formData.append('epub', book.value.content)
     }
 
-    const response = await fetch('/api/livros', {
+    const response = await fetch('/api/books', {
       method: 'POST',
       body: formData
     })
 
     if (response.ok) {
-      livro.value = { nome: '', serieId: '', conteudo: null }
+      book.value = { name: '', serieId: '', content: null }
       await carregarLivros()
     }
   } catch (error) {
-    console.error('Erro ao cadastrar livro:', error)
+    console.error('Erro ao cadastrar book:', error)
   }
 }
 
-// Deletar livro
+// Deletar book
 const deletarLivro = async (id: number) => {
   try {
-    const response = await fetch(`/api/livros/${id}`, {
+    const response = await fetch(`/api/books/${id}`, {
       method: 'DELETE'
     })
 
@@ -151,7 +151,7 @@ const deletarLivro = async (id: number) => {
       await carregarLivros()
     }
   } catch (error) {
-    console.error('Erro ao deletar livro:', error)
+    console.error('Erro ao deletar book:', error)
   }
 }
 

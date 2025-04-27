@@ -8,10 +8,10 @@ export default defineEventHandler(async (event) => {
         try {
             const series = await prisma.serie.findMany({
                 include: {
-                    livros: {
+                    books: {
                         select: {
                             id: true,
-                            nome: true,
+                            name: true,
                             createdAt: true
                         }
                     }
@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
             })
             return series
         } catch (error) {
+            console.log(error)
             throw createError({
                 statusCode: 500,
                 statusMessage: 'Erro ao buscar séries'
@@ -32,8 +33,8 @@ export default defineEventHandler(async (event) => {
             const body = await readBody(event)
             const serie = await prisma.serie.create({
                 data: {
-                    titulo: body.titulo,
-                    autor: body.autor
+                    title: body.title,
+                    author: body.author
                 }
             })
             return serie

@@ -3,69 +3,69 @@ import {PrismaClient} from "@prisma/client";
 const prisma = new PrismaClient()
 
 export default defineEventHandler(async (event) => {
-    // GET /api/livros
+    // GET /api/books
     if (event.method === 'GET') {
         try {
             const query = getQuery(event)
             const serieId = query.serieId ? parseInt(query.serieId as string) : undefined
 
-            const livros = await prisma.livro.findMany({
+            const books = await prisma.book.findMany({
                 where: serieId ? {
                     serieId
                 } : undefined,
                 include: {
                     serie: {
                         select: {
-                            titulo: true,
-                            autor: true
+                            title: true,
+                            author: true
                         }
                     }
                 }
             })
-            return livros.map(livro => ({
-                ...livro,
-                conteudo: undefined // Não enviamos o conteúdo na listagem
+            return books.map(book => ({
+                ...book,
+                content: undefined // Não enviamos o conteúdo na listagem
             }))
         } catch (error) {
             throw createError({
                 statusCode: 500,
-                statusMessage: 'Erro ao buscar livros'
+                statusMessage: 'Erro ao buscar books'
             })
         }
     }
 
-    // POST /api/livros
+    // POST /api/books
     if (event.method === 'POST') {
         try {
             const formData = await readMultipartFormData(event)
             if (!formData) throw new Error('Nenhum dado enviado')
 
-            const nome = formData.find(item => item.name === 'nome')?.data?.toString()
+            const name = formData.find(item => item.name === 'name')?.data?.toString()
             const serieId = parseInt(formData.find(item => item.name === 'serieId')?.data?.toString() || '')
             const epubFile = formData.find(item => item.name === 'epub')
 
-            if (!nome || !serieId || !epubFile) {
+            if (!name || !serieId || !epubFile) {
                 throw new Error('Dados incompletos')
             }
 
-            const livro = await prisma.livro.create({
+            const book = await prisma.book.create({
                 data: {
-                    nome,
+                    name,
                     serieId,
-                    conteudo: epubFile.data
+                    content: epubFile.data
                 }
             })
 
             return {
-                id: livro.id,
-                nome: livro.nome,
-                serieId: livro.serieId,
-                createdAt: livro.createdAt
+                id: book.id,
+                name: book.name,
+                serieId: book.serieId,
+                createdAt: book.createdAt
             }
         } catch (error) {
             throw createError({
                 statusCode: 500,
-                statusMessage: error.message || 'Erro ao criar livro'
+                statusMessage: error.message || 'Erro ao criar book'
             })
         }
     }

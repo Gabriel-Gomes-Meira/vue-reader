@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
         try {
             const id = Number(event.context.params?.id)
 
-            await prisma.livro.delete({
+            await prisma.book.delete({
                 where: {
                     id: id
                 }
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
         } catch (error) {
             throw createError({
                 statusCode: 500,
-                statusMessage: 'Erro ao deletar livro'
+                statusMessage: 'Erro ao deletar book'
             })
         }
     }

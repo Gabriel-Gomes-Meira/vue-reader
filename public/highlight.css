@@ -1,0 +1,10 @@
+.highlight {
+    display: inline!important;
+}
+.highlight::before {
+    text-indent: 0;
+}
+
+.no-text-indent {
+    text-indent: 0;
+}

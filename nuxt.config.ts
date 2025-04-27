@@ -5,5 +5,5 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
   css: ["~/assets/app.css"],
-  compatibilityDate: "2024-07-02"
+  compatibilityDate: "2025-04-26"
 })

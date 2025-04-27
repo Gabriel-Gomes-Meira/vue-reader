@@ -10,7 +10,7 @@
         </label>
         <input
             type="text"
-            v-model="serie.titulo"
+            v-model="serie.title"
             class="input input-bordered w-full max-w-md"
             required
         />
@@ -22,7 +22,7 @@
         </label>
         <input
             type="text"
-            v-model="serie.autor"
+            v-model="serie.author"
             class="input input-bordered w-full max-w-md"
             required
         />
@@ -59,8 +59,8 @@
           <tbody>
           <tr v-for="item in series" :key="item.id">
             <td>{{ item.id }}</td>
-            <td>{{ item.titulo }}</td>
-            <td>{{ item.autor }}</td>
+            <td>{{ item.title }}</td>
+            <td>{{ item.author }}</td>
             <td class="flex gap-2">
               <button
                   class="btn btn-info btn-sm"
@@ -86,8 +86,8 @@
 <script setup lang="ts">
 const serie = ref({
   id: null as number | null,
-  titulo: '',
-  autor: ''
+  title: '',
+  author: ''
 })
 
 const series = ref([])
@@ -138,8 +138,8 @@ const atualizarSerie = async () => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        titulo: serie.value.titulo,
-        autor: serie.value.autor
+        title: serie.value.title,
+        author: serie.value.author
       })
     })
 
@@ -162,8 +162,8 @@ const cancelarEdicao = () => {
 const limparFormulario = () => {
   serie.value = {
     id: null,
-    titulo: '',
-    autor: ''
+    title: '',
+    author: ''
   }
 }
 

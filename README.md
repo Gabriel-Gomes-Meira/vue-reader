@@ -17,8 +17,8 @@ Antes de começar, certifique-se de ter os seguintes itens instalados:
 1. Clone este repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/nome-do-repositorio.git
-cd nome-do-repositorio
+git clone https://github.com/seu-usuario/name-do-repositorio.git
+cd name-do-repositorio
 ```
 
 2. Instale as dependências do projeto:
@@ -38,10 +38,10 @@ npm install
 3. Configure o banco de dados PostgreSQL:
 
    - Crie um banco de dados no PostgreSQL.
-   - Renomeie o arquivo `.env.example` para `.env` e atualize as variáveis de ambiente com suas credenciais do PostgreSQL.
+   - Renameie o arquivo `.env.example` para `.env` e atualize as variáveis de ambiente com suas credenciais do PostgreSQL.
 
 ```bash
-DATABASE_URL="postgresql://usuário:senha@localhost:5432/nome-do-banco"
+DATABASE_URL="postgresql://usuário:senha@localhost:5432/name-do-banco"
 ```
 
 4. Execute as migrações do Prisma para configurar o banco de dados:
